@@ -1,0 +1,52 @@
+name: KOS聚光投流时报自动推送
+
+on:
+  schedule:
+    - cron: '10 2,6,10,14 * * *'
+  workflow_dispatch:
+
+jobs:
+  kos-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Noto CJK font
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+
+      - name: Run KOS report
+        env:
+          IMAP_SERVER: ${{ secrets.IMAP_SERVER }}
+          IMAP_PORT: ${{ secrets.IMAP_PORT }}
+          IMAP_USER: ${{ secrets.IMAP_USER }}
+          IMAP_PASS: ${{ secrets.IMAP_PASS }}
+          DINGTALK_WEBHOOK: ${{ secrets.DINGTALK_WEBHOOK }}
+          GIT_REPO: ${{ secrets.GIT_REPO }}
+          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+        run: python kos_report.py
+
+      - name: Commit and push images
+        run: |
+          git config user.name "KOS-Reporter"
+          git config user.email "kos-reporter@bot.local"
+          git add images/ -f
+          git diff --staged --quiet || git commit -m "auto: report images $(date +%Y%m%d-%H%M)"
+          git push
+
+      - name: Trigger jsDelivr CDN cache refresh
+        run: |
+          for img in images/report-*.png; do
+            filename=$(basename "$img")
+            echo "Purging CDN cache for $filename"
+            curl -s "https://purge.jsdelivr.net/gh/mktkhwtyw9-creator/kos-report@main/images/$filename" || true
+          done
