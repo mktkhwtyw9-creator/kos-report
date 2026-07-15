@@ -48,12 +48,15 @@ except ImportError:
 IMAP_SERVER = os.environ.get("IMAP_SERVER", "imap.exmail.qq.com")
 IMAP_PORT = int(os.environ.get("IMAP_PORT", "993"))
 IMAP_USER = os.environ.get("IMAP_USER", "can.yang@tarsocial.com")
-IMAP_PASSWORD = os.environ.get("IMAP_PASSWORD", "")
+# 兼容 workflow 中的 IMAP_PASS 和脚本的 IMAP_PASSWORD
+IMAP_PASSWORD = os.environ.get("IMAP_PASSWORD") or os.environ.get("IMAP_PASS", "")
 SENDER_FILTER = "service@mobgi.com"
-CLIENT_WEBHOOK = os.environ.get("CLIENT_WEBHOOK", "")
+# 兼容 workflow 中的 DINGTALK_WEBHOOK 和脚本的 CLIENT_WEBHOOK
+CLIENT_WEBHOOK = os.environ.get("CLIENT_WEBHOOK") or os.environ.get("DINGTALK_WEBHOOK", "")
 KEYWORD = "创量"
 GITHUB_REPOSITORY = os.environ.get("GITHUB_REPOSITORY", "")
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
+# 兼容 workflow 中的 GIT_TOKEN（PAT）和 GitHub Actions 自动提供的 GITHUB_TOKEN
+GITHUB_TOKEN = os.environ.get("GIT_TOKEN") or os.environ.get("GITHUB_TOKEN", "")
 
 # 北京时间
 BJT = timezone(timedelta(hours=8))
