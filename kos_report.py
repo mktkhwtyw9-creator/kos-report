@@ -536,33 +536,44 @@ def get_image_url(image_filename, repo=None):
 
 def send_dingtalk_webhook(rows, date_time, pic_url):
     """发送markdown消息到钉钉客户群"""
-    # 取第一行数据
-    row = rows[0]
-    date_part, time_part, account, cost, read, interact, cpm, cpc, cpe = row
 
-    # 表格行（取前3行）
-    table_rows = "\n".join(
-        f"| {r[3]} | {r[4]} | {r[5]} | {r[6]} | {r[7]} | {r[8]} |"
-        for r in rows[:3]
-    )
+    summary_lines = []
+    for row in rows[:3]:
+        if len(row) >= 9:
+            account = row[2]
+            cost = row[3]
+            read = row[4]
+            interact = row[5]
+            cpm = row[6]
+            cpc = row[7]
+            cpe = row[8]
+            summary_lines.append(
+                f"**账号名称**：{account}\n"
+                f"**消耗**：{cost}　**阅读**：{read}　**互动**：{interact}\n"
+                f"**CPM**：{cpm}　**CPC**：{cpc}　**CPE**：{cpe}"
+            )
 
-    markdown_text = f"""# 创量 KOS聚光投放时报（当日累计）
+    summary = "\n\n".join(summary_lines) if summary_lines else "数据加载中..."
 
-**时间**：{date_time}
-**账号**：{account}
+    markdown_text = f"""创量·聚光投放时报
 
-| 消耗 | 阅读 | 互动 | 阅读CPM | CPC | CPE |
-| --- | --- | --- | --- | --- | --- |
-{table_rows}
+## 📊 聚光投放时报（当日累计）
+> 📅 {date_time}
 
-![创量 KOS聚光投放时报]({pic_url})
+![聚光投放时报数据]({pic_url})
 
-数据由创量机器人自动采集 · 仟传传播"""
+---
+
+{summary}
+
+---
+
+> 数据由创量机器人自动采集转发"""
 
     payload = {
         "msgtype": "markdown",
         "markdown": {
-            "title": f"创量 KOS聚光投放时报 {date_time}",
+            "title": f"创量·聚光投放时报 {date_time}",
             "text": markdown_text
         }
     }
