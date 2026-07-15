@@ -58,6 +58,12 @@ GITHUB_REPOSITORY = os.environ.get("GITHUB_REPOSITORY", "")
 # 兼容 workflow 中的 GIT_TOKEN（PAT）和 GitHub Actions 自动提供的 GITHUB_TOKEN
 GITHUB_TOKEN = os.environ.get("GIT_TOKEN") or os.environ.get("GITHUB_TOKEN", "")
 
+# DEBUG: 检查token来源（不输出实际值）
+import sys as _sys
+_git_token_set = bool(os.environ.get("GIT_TOKEN"))
+_gh_token_set = bool(os.environ.get("GITHUB_TOKEN"))
+print(f"[DEBUG] GIT_TOKEN set: {_git_token_set}, GITHUB_TOKEN set: {_gh_token_set}, final token len: {len(GITHUB_TOKEN)}", file=_sys.stderr)
+
 # 北京时间
 BJT = timezone(timedelta(hours=8))
 
